@@ -57,8 +57,8 @@ original_dataset = pd.read_csv(DATA_PATH / ORIG_DATASET_FNAME, index_col=0)
 original_dataset.index = pd.to_datetime(original_dataset.index)
 KalFilter = KalmanFilters()
 kalman_dataset = KalFilter.apply_kalman_filter(original_dataset, 'acc_phone_X')
-DataViz.plot_imputed_values(kalman_dataset, ['original', 'kalman'], 'acc_phone_X', kalman_dataset['acc_phone_X_kalman'])
-DataViz.plot_dataset(kalman_dataset, ['acc_phone_X', 'acc_phone_X_kalman'], ['exact', 'exact'], ['line', 'line'])
+# DataViz.plot_imputed_values(kalman_dataset, ['original', 'kalman'], 'acc_phone_X', kalman_dataset['acc_phone_X_kalman'])
+# DataViz.plot_dataset(kalman_dataset, ['acc_phone_X', 'acc_phone_X_kalman'], ['exact', 'exact'], ['line', 'line'])
 
 # We ignore the Kalman filter output for now...
 
@@ -92,9 +92,9 @@ selected_predictor_cols = [c for c in dataset.columns if (not ('label' in c)) an
 pc_values = PCA.determine_pc_explained_variance(dataset, selected_predictor_cols)
 
 # Plot the variance explained.
-DataViz.plot_xy(x=[range(1, len(selected_predictor_cols) + 1)], y=[pc_values],
-                xlabel='principal component number', ylabel='explained variance',
-                ylim=[0, 1], line_styles=['b-'])
+# DataViz.plot_xy(x=[range(1, len(selected_predictor_cols) + 1)], y=[pc_values],
+#                 xlabel='principal component number', ylabel='explained variance',
+#                 ylim=[0, 1], line_styles=['b-'])
 
 # We select 7 as the best number of PC's as this explains most of the variance
 
@@ -104,13 +104,13 @@ dataset = PCA.apply_pca(copy.deepcopy(dataset), selected_predictor_cols, n_pcs)
 
 # And we visualize the result of the PC's
 
-DataViz.plot_dataset(dataset, ['pca_', 'label'], ['like', 'like'], ['line', 'points'])
+# DataViz.plot_dataset(dataset, ['pca_', 'label'], ['like', 'like'], ['line', 'points'])
 
 # And the overall final dataset:
 
-DataViz.plot_dataset(dataset, ['acc_', 'gyr_', 'mag_', 'pca_', 'label'],
-                     ['like', 'like', 'like', 'like', 'like'],
-                     ['line', 'line', 'line', 'points', 'points'])
+# DataViz.plot_dataset(dataset, ['acc_', 'gyr_', 'mag_', 'pca_', 'label'],
+#                      ['like', 'like', 'like', 'like', 'like'],
+#                      ['line', 'line', 'line', 'points', 'points'])
 
 # Store the outcome.
 

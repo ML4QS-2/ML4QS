@@ -7,20 +7,19 @@
 #                                                            #
 ##############################################################
 
-from util.VisualizeDataset import VisualizeDataset
-from Chapter3.OutlierDetection import DistributionBasedOutlierDetection
-from Chapter3.OutlierDetection import DistanceBasedOutlierDetection
 import sys
-import copy
-import pandas as pd
-import numpy as np
 from pathlib import Path
+
+import numpy as np
+import pandas as pd
+from Chapter3.OutlierDetection import DistanceBasedOutlierDetection
+from Chapter3.OutlierDetection import DistributionBasedOutlierDetection
+from util.VisualizeDataset import VisualizeDataset
 
 
 def main():
-
     # Set up file names and locations.
-    DATA_PATH = Path('./intermediate_datafiles/')
+    DATA_PATH = Path('./intermediate_datafiles/ours')
     DATASET_FNAME = sys.argv[1] if len(sys.argv) > 1 else 'chapter2_result.csv'
     RESULT_FNAME = sys.argv[2] if len(sys.argv) > 2 else 'chapter3_result_outliers.csv'
 
@@ -37,12 +36,13 @@ def main():
     DataViz = VisualizeDataset(__file__)
 
     # Compute the number of milliseconds covered by an instance using the first two rows.
-    milliseconds_per_instance = (dataset.index[1] - dataset.index[0]).microseconds/1000
+    milliseconds_per_instance = (dataset.index[1] - dataset.index[0]).microseconds / 1000
 
     # Step 1: Let us see whether we have some outliers we would prefer to remove.
 
     # Determine the columns we want to experiment on.
-    outlier_columns = ['acc_phone_x', 'light_phone_lux']
+    outlier_columns = ['acc_phone_X', 'acc_phone_Y', 'acc_phone_Z', 'gyr_phone_X', 'gyr_phone_Y', 'gyr_phone_Z',
+                       'mag_phone_X', 'mag_phone_Y', 'mag_phone_Z']
 
     # Create the outlier classes.
     OutlierDistr = DistributionBasedOutlierDetection()
@@ -58,7 +58,7 @@ def main():
         dataset = OutlierDistr.chauvenet(dataset, col)
         DataViz.plot_binary_outliers(dataset, col, col + '_outlier')
         dataset = OutlierDistr.mixture_model(dataset, col)
-        DataViz.plot_dataset(dataset, [col, col + '_mixture'], ['exact','exact'], ['line', 'points'])
+        DataViz.plot_dataset(dataset, [col, col + '_mixture'], ['exact', 'exact'], ['line', 'points'])
         # This requires:
         # n_data_points * n_data_points * point_size =
         # 31839 * 31839 * 32 bits = ~4GB available memory
@@ -72,7 +72,7 @@ def main():
 
         try:
             dataset = OutlierDist.local_outlier_factor(dataset, [col], 'euclidean', 5)
-            DataViz.plot_dataset(dataset, [col, 'lof'], ['exact','exact'], ['line', 'points'])
+            DataViz.plot_dataset(dataset, [col, 'lof'], ['exact', 'exact'], ['line', 'points'])
         except MemoryError as e:
             print('Not enough memory available for lof...')
             print('Skipping.')
@@ -92,6 +92,7 @@ def main():
         del dataset[col + '_outlier']
 
     dataset.to_csv(DATA_PATH / RESULT_FNAME)
+
 
 if __name__ == '__main__':
     main()

@@ -3,7 +3,7 @@ import math
 
 import pandas as pd
 
-file_name = 'Proximity'
+file_name = 'Magnetometer'
 df = pd.read_csv('datasets/Test 15 minutes schedule/' + file_name + '.csv', skipinitialspace=True)
 
 
@@ -19,7 +19,7 @@ def calc_min_sec_etc(second):
     m = int(hr_min_sec.split(':')[1])
     s = int(hr_min_sec.split(':')[2])
 
-    now = int(round(datetime.datetime(2020, 6, 2, 12 + h, 0 + m, s, int(m_sec)).timestamp() * 1000000000))
+    now = int(round(datetime.datetime(2020, 6, 1, 17 + h, m, s, int(m_sec)).timestamp() * 1000000000))
     return now
 
 

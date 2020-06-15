@@ -1,4 +1,10 @@
 *.pyc
 datasets
-PythonCode/intermediate_datafiles/
-PythonCode/Example_graphs/
+code/intermediate_datafiles/
+code/Example_graphs/
+ML4QS.iml
+code/.bash_history
+code/figures/
+code/intermediate_datafiles/
+venv/
+

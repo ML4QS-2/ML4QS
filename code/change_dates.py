@@ -3,9 +3,6 @@ import math
 
 import pandas as pd
 
-file_name = 'Magnetometer'
-df = pd.read_csv('datasets/dance/' + file_name + '.csv', skipinitialspace=True)
-
 
 def calc_min_sec_etc(second):
     s = float(second)
@@ -19,12 +16,17 @@ def calc_min_sec_etc(second):
     m = int(hr_min_sec.split(':')[1])
     s = int(hr_min_sec.split(':')[2])
 
-    now = int(round(datetime.datetime(2020, 6, 1, 17 + h, m, s, int(m_sec)).timestamp() * 1000000000))
+    now = int(round(datetime.datetime(2020, 6, 16, 17 + h, m, s, int(m_sec)).timestamp() * 1000000000))
     return now
 
 
-df['new_timestamp'] = df.apply(lambda row: calc_min_sec_etc(row.Time), axis=1)
+file_names = ['Magnetometer', 'Accelerometer', 'Gyroscope']  # Labels
 
-print('saving file')
+for file_name in file_names:
+    df = pd.read_csv('datasets/dancing-raw/' + file_name + '.csv', skipinitialspace=True)
 
-df.to_csv('datasets/dance/' + file_name + '.csv')
+    df['new_timestamp'] = df.apply(lambda row: calc_min_sec_etc(row['Time (s)']), axis=1)
+
+    print('saving file', file_name)
+
+    df.to_csv('datasets/dance/' + file_name + '.csv')

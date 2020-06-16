@@ -32,7 +32,7 @@ If no location is specified, the default locations in the else statement are cho
 output into the next by default.
 """
 
-DATASET_PATH = Path(sys.argv[1] if len(sys.argv) > 1 else './datasets/crowdsignals/csv-participant-one/')
+DATASET_PATH = Path(sys.argv[1] if len(sys.argv) > 1 else './datasets/dance/')
 RESULT_PATH = Path('./intermediate_datafiles/')
 RESULT_FNAME = sys.argv[2] if len(sys.argv) > 2 else 'chapter2_result.csv'
 
@@ -54,20 +54,20 @@ for milliseconds_per_instance in GRANULARITIES:
 
     # We add the accelerometer data (continuous numerical measurements) of the phone and the smartwatch
     # and aggregate the values per timestep by averaging the values
-    dataset.add_numerical_dataset('Accelerometer.csv', 'timestamps', ['X', 'Y', 'Z'], 'avg', 'acc_phone_')
+    dataset.add_numerical_dataset('Accelerometer.csv', 'new_timestamp', ['X', 'Y', 'Z'], 'avg', 'acc_phone_')
 
     # We add the gyroscope data (continuous numerical measurements) of the phone and the smartwatch
     # and aggregate the values per timestep by averaging the values
-    dataset.add_numerical_dataset('Gyroscope.csv', 'timestamps', ['X', 'Y', 'Z'], 'avg', 'gyr_phone_')
+    dataset.add_numerical_dataset('Gyroscope.csv', 'new_timestamp', ['X', 'Y', 'Z'], 'avg', 'gyr_phone_')
 
     # We add the magnetometer data (continuous numerical measurements) of the phone and the smartwatch
     # and aggregate the values per timestep by averaging the values
-    dataset.add_numerical_dataset('Magnetometer.csv', 'timestamps', ['X', 'Y', 'Z'], 'avg', 'mag_phone_')
+    dataset.add_numerical_dataset('Magnetometer.csv', 'new_timestamp', ['X', 'Y', 'Z'], 'avg', 'mag_phone_')
 
     # We add the labels provided by the users. These are categorical events that might overlap. We add them
     # as binary attributes (i.e. add a one to the attribute representing the specific value for the label if it
     # occurs within an interval).
-    dataset.add_event_dataset('labels.csv', 'label_start', 'label_end', 'label', 'binary')
+    dataset.add_event_dataset('Labels.csv', 'label_start', 'label_end', 'label', 'binary')
 
     # Get the resulting pandas data table
     dataset = dataset.data_table
@@ -76,13 +76,12 @@ for milliseconds_per_instance in GRANULARITIES:
     DataViz = VisualizeDataset(__file__)
 
     # Boxplot
-    DataViz.plot_dataset_boxplot(dataset, ['acc_phone_x', 'acc_phone_y', 'acc_phone_z', 'acc_watch_x', 'acc_watch_y',
-                                           'acc_watch_z'])
+    DataViz.plot_dataset_boxplot(dataset, ['acc_phone_X', 'acc_phone_Y', 'acc_phone_Z'])
 
     # Plot all data
-    DataViz.plot_dataset(dataset, ['acc_', 'gyr_', 'hr_watch_rate', 'light_phone_lux', 'mag_', 'press_phone_', 'label'],
-                         ['like', 'like', 'like', 'like', 'like', 'like', 'like', 'like'],
-                         ['line', 'line', 'line', 'line', 'line', 'line', 'points', 'points'])
+    DataViz.plot_dataset(dataset, ['acc_', 'gyr_', 'mag_', 'label'],
+                         ['like', 'like', 'like', 'like'],
+                         ['line', 'line', 'line', 'points'])
 
     # And print a summary of the dataset.
     util.print_statistics(dataset)

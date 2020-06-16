@@ -16,7 +16,8 @@ def calc_min_sec_etc(second):
     m = int(hr_min_sec.split(':')[1])
     s = int(hr_min_sec.split(':')[2])
 
-    now = int(round(datetime.datetime(2020, 6, 16, 17 + h, m, s, int(m_sec)).timestamp() * 1000000000))
+    # 19 = 17 hours --> GMT?
+    now = int(round(datetime.datetime(2020, 6, 16, 19 + h, m, s, int(m_sec)).timestamp() * 1000000000))
     return now
 
 

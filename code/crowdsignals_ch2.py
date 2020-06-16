@@ -32,7 +32,7 @@ If no location is specified, the default locations in the else statement are cho
 output into the next by default.
 """
 
-DATASET_PATH = Path(sys.argv[1] if len(sys.argv) > 1 else './datasets/dance/')
+DATASET_PATH = Path(sys.argv[1] if len(sys.argv) > 1 else './clean_dataset/dance/')
 RESULT_PATH = Path('./intermediate_datafiles/')
 RESULT_FNAME = sys.argv[2] if len(sys.argv) > 2 else 'chapter2_result.csv'
 

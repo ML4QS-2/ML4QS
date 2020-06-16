@@ -54,15 +54,15 @@ for milliseconds_per_instance in GRANULARITIES:
 
     # We add the accelerometer data (continuous numerical measurements) of the phone and the smartwatch
     # and aggregate the values per timestep by averaging the values
-    dataset.add_numerical_dataset('Accelerometer.csv', 'new_timestamp', ['X', 'Y', 'Z'], 'avg', 'acc_phone_')
+    dataset.add_numerical_dataset('Accelerometer.csv', 'Time', ['X', 'Y', 'Z'], 'avg', 'acc_phone_')
 
     # We add the gyroscope data (continuous numerical measurements) of the phone and the smartwatch
     # and aggregate the values per timestep by averaging the values
-    dataset.add_numerical_dataset('Gyroscope.csv', 'new_timestamp', ['X', 'Y', 'Z'], 'avg', 'gyr_phone_')
+    dataset.add_numerical_dataset('Gyroscope.csv', 'Time', ['X', 'Y', 'Z'], 'avg', 'gyr_phone_')
 
     # We add the magnetometer data (continuous numerical measurements) of the phone and the smartwatch
     # and aggregate the values per timestep by averaging the values
-    dataset.add_numerical_dataset('Magnetometer.csv', 'new_timestamp', ['X', 'Y', 'Z'], 'avg', 'mag_phone_')
+    dataset.add_numerical_dataset('Magnetometer.csv', 'Time', ['X', 'Y', 'Z'], 'avg', 'mag_phone_')
 
     # We add the labels provided by the users. These are categorical events that might overlap. We add them
     # as binary attributes (i.e. add a one to the attribute representing the specific value for the label if it

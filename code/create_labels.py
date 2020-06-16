@@ -21,6 +21,6 @@ def create_labels(input):
 
 res = create_labels(labels_and_seconds)
 print(res)
-with open("./datasets/dance/Labels.csv", "w", newline="") as f:
+with open("./clean_dataset/dance/Labels.csv", "w", newline="") as f:
     writer = csv.writer(f)
     writer.writerows(res)

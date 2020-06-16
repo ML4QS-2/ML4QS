@@ -30,4 +30,4 @@ for file_name in file_names:
 
     print('saving file', file_name)
 
-    df.to_csv('datasets/dance/' + file_name + '.csv')
+    df.to_csv('./clean_dataset/dance/' + file_name + '.csv')

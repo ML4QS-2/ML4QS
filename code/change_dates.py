@@ -11,12 +11,12 @@ def calc_min_sec_etc(second):
     m_sec = str(s - int(s))[2:5]
 
     hr_min_sec = str(datetime.timedelta(seconds=max(sec, 0)))
-    h = int(hr_min_sec.split(':')[0])
-    m = int(hr_min_sec.split(':')[1])
-    s = int(hr_min_sec.split(':')[2])
+    h = int(float(hr_min_sec.split(':')[0]))
+    m = int(float(hr_min_sec.split(':')[1]))
+    s = int(float(hr_min_sec.split(':')[2]))
 
     # 19 = 17 hours --> GMT?
-    now = int(round(datetime.datetime(2020, 6, 16, 19 + h, m, s, int(m_sec)).timestamp() * 1000000000))
+    now = int(round(datetime.datetime(2020, 6, 16, 19 + h, m, s, int(float(m_sec))).timestamp() * 1000000000))
     return now
 
 
@@ -25,7 +25,7 @@ col_rename = {
     'Magnetometer': ['Time (s)', 'X', 'Y', 'Z', 'Time'],
     'Accelerometer': ['Time (s)', 'X', 'Y', 'Z', 'Time'],
     'Gyroscope': ['Time (s)', 'X', 'Y', 'Z', 'Time'],
-    'Labels': ['Time (s)', 'label', 'Step', 'Duration', 'label_start','label_end']
+    'Labels': ['Time (s)', 'label', 'Step', 'Duration', 'label_start', 'label_end']
 }
 
 for file_name in file_names:

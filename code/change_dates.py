@@ -25,7 +25,7 @@ col_rename = {
     'Magnetometer': ['Time (s)', 'X', 'Y', 'Z', 'Time'],
     'Accelerometer': ['Time (s)', 'X', 'Y', 'Z', 'Time'],
     'Gyroscope': ['Time (s)', 'X', 'Y', 'Z', 'Time'],
-    'Labels': ['Time (s)', 'label', 'Step', 'Duration', 'label_start', 'label_end']
+    'Labels': ['Time (s)', 'label', 'Step', 'Duration', 'Step', 'label_start', 'label_end']
 }
 
 for file_name in file_names:

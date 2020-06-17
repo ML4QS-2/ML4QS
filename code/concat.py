@@ -30,6 +30,13 @@ for d in all_dirs:
     
     for f in files:
         df = pd.read_csv(os.path.join(INPUT_FOLDER, d, f))
+        print(d, f, max_duration)
+        if f == 'Labels.csv':
+            df['step'] = df['Duration'].apply(lambda x: range(x))
+            df = df.explode('step')
+            df['Time (s)'] = df['Time (s)'] + df['step']
+            print(df)
+
         df['Time (s)'] = df['Time (s)'] + max(max_duration)
         data[f] = data[f].append(df)
 

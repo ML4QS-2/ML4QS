@@ -10,8 +10,7 @@ def calc_min_sec_etc(second):
 
     m_sec = str(s - int(s))[2:5]
 
-    hr_min_sec = str(datetime.timedelta(seconds=sec))
-
+    hr_min_sec = str(datetime.timedelta(seconds=min(sec, 0)))
     h = int(hr_min_sec.split(':')[0])
     m = int(hr_min_sec.split(':')[1])
     s = int(hr_min_sec.split(':')[2])

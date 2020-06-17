@@ -7,4 +7,6 @@ code/.bash_history
 code/figures/
 code/intermediate_datafiles/
 venv/
+.vscode
+code/input_data
 

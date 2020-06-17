@@ -1,27 +1,16 @@
-from util.util import get_chapter
-
-import matplotlib.colors as cl
-import matplotlib.pyplot as plt
-import matplotlib.dates as md
-import numpy as np
-import pandas as pd
-from pathlib import Path
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.patches as mpatches
-import matplotlib.cm as cm
-from scipy.cluster.hierarchy import dendrogram
 import itertools
-from scipy.optimize import curve_fit
-import re
-import math
 import sys
 from pathlib import Path
-import dateutil
+
+import matplotlib.dates as md
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.cluster.hierarchy import dendrogram
+
 
 class VisualizeDataset:
-
-    point_displays = ['+', 'x'] #'*', 'd', 'o', 's', '<', '>']
-    line_displays = ['-'] #, '--', ':', '-.']
+    point_displays = ['+', 'x']  # '*', 'd', 'o', 's', '<', '>']
+    line_displays = ['-']  # , '--', ':', '-.']
     colors = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
 
     # Set some initial attributes to define and create a save location for the images.
@@ -32,14 +21,13 @@ class VisualizeDataset:
         self.figures_dir = Path('figures') / subdir
         self.figures_dir.mkdir(exist_ok=True, parents=True)
 
-
-    def save(self, plot_obj, formats=('png',)): # 'svg'
+    def save(self, plot_obj, formats=('png',)):  # 'svg'
 
         fig_name = f'figure_{self.plot_number}'
 
         for format in formats:
             save_path = self.figures_dir / f'{fig_name}.{format}'
-            plot_obj.savefig(save_path)
+            plot_obj.savefig(save_path, dpi=300)
             print(f'Figure saved to {save_path}')
 
         self.plot_number += 1
@@ -81,8 +69,6 @@ class VisualizeDataset:
             max_values = []
             min_values = []
 
-
-
             # Pass through the relevant columns.
             for j in range(0, len(relevant_cols)):
                 # Create a mask to ignore the NaN and Inf values when plotting:
@@ -93,17 +79,17 @@ class VisualizeDataset:
                 # Display point, or as a line
                 if display[i] == 'points':
                     xar[i].plot(data_table.index[mask], data_table[relevant_cols[j]][mask],
-                                self.point_displays[j%len(self.point_displays)])
+                                self.point_displays[j % len(self.point_displays)])
                 else:
                     xar[i].plot(data_table.index[mask], data_table[relevant_cols[j]][mask],
-                                self.line_displays[j%len(self.line_displays)])
+                                self.line_displays[j % len(self.line_displays)])
 
             xar[i].tick_params(axis='y', labelsize=10)
             xar[i].legend(relevant_cols, fontsize='xx-small', numpoints=1, loc='upper center',
                           bbox_to_anchor=(0.5, 1.3), ncol=len(relevant_cols), fancybox=True, shadow=True)
 
-            xar[i].set_ylim([min(min_values) - 0.1*(max(max_values) - min(min_values)),
-                             max(max_values) + 0.1*(max(max_values) - min(min_values))])
+            xar[i].set_ylim([min(min_values) - 0.1 * (max(max_values) - min(min_values)),
+                             max(max_values) + 0.1 * (max(max_values) - min(min_values))])
 
         # Make sure we get a nice figure with only a single x-axis and labels there.
         plt.setp([a.get_xticklabels() for a in f.axes[:-1]], visible=False)
@@ -133,8 +119,9 @@ class VisualizeDataset:
         plt.show()
 
     def plot_dataset_boxplot(self, dataset, cols):
-        plt.Figure(); dataset[cols].plot.box()
-        plt.ylim([-30,30])
+        plt.Figure();
+        dataset[cols].plot.box()
+        plt.ylim([-30, 30])
         self.save(plt)
         plt.show()
 
@@ -143,7 +130,7 @@ class VisualizeDataset:
         plt.xlabel('Freq(Hz)')
         plt.ylabel('amplitude')
         # Plot the real values as a '+' and imaginary in the same way (though with a different color).
-        plt.plot(freq, ampl_real, '+', freq, ampl_imag,'+')
+        plt.plot(freq, ampl_real, '+', freq, ampl_imag, '+')
         plt.legend(['real', 'imaginary'], numpoints=1)
         self.save(plt)
         plt.show()
@@ -151,8 +138,8 @@ class VisualizeDataset:
     # Plot outliers in case of a binary outlier score. Here, the col specifies the real data
     # column and outlier_col the columns with a binary value (outlier or not)
     def plot_binary_outliers(self, data_table, col, outlier_col):
-        data_table.loc[:,:] = data_table.dropna(axis=0, subset=[col, outlier_col])
-        data_table.loc[:,outlier_col] = data_table[outlier_col].astype('bool')
+        data_table.loc[:, :] = data_table.dropna(axis=0, subset=[col, outlier_col])
+        data_table.loc[:, outlier_col] = data_table[outlier_col].astype('bool')
         f, xar = plt.subplots()
         xfmt = md.DateFormatter('%H:%M')
         xar.xaxis.set_major_formatter(xfmt)
@@ -161,7 +148,8 @@ class VisualizeDataset:
         # Plot data points that are outliers in red, and non outliers in blue.
         xar.plot(data_table.index[data_table[outlier_col]], data_table[col][data_table[outlier_col]], 'r+')
         xar.plot(data_table.index[~data_table[outlier_col]], data_table[col][~data_table[outlier_col]], 'b+')
-        plt.legend(['outlier ' + col, 'no_outlier_' + col], numpoints=1, fontsize='xx-small', loc='upper center',  ncol=2, fancybox=True, shadow=True)
+        plt.legend(['outlier ' + col, 'no_outlier_' + col], numpoints=1, fontsize='xx-small', loc='upper center',
+                   ncol=2, fancybox=True, shadow=True)
         self.save(plt)
         plt.show()
 
@@ -183,14 +171,17 @@ class VisualizeDataset:
         # plot the regular dataset.
 
         xar[0].xaxis.set_major_formatter(xfmt)
-        xar[0].plot(data_table.index[data_table[col].notnull()], data_table[col][data_table[col].notnull()], 'b+', markersize='2')
-        xar[0].legend([names[0]], fontsize='small', numpoints=1, loc='upper center',  bbox_to_anchor=(0.5, 1.3), ncol=1, fancybox=True, shadow=True)
+        xar[0].plot(data_table.index[data_table[col].notnull()], data_table[col][data_table[col].notnull()], 'b+',
+                    markersize='2')
+        xar[0].legend([names[0]], fontsize='small', numpoints=1, loc='upper center', bbox_to_anchor=(0.5, 1.3), ncol=1,
+                      fancybox=True, shadow=True)
 
         # and plot the others that have resulted from imputation.
-        for i in range(1, len(values)+1):
+        for i in range(1, len(values) + 1):
             xar[i].xaxis.set_major_formatter(xfmt)
-            xar[i].plot(data_table.index, values[i-1], 'b+', markersize='2')
-            xar[i].legend([names[i]], fontsize='small', numpoints=1, loc='upper center',  bbox_to_anchor=(0.5, 1.3), ncol=1, fancybox=True, shadow=True)
+            xar[i].plot(data_table.index, values[i - 1], 'b+', markersize='2')
+            xar[i].legend([names[i]], fontsize='small', numpoints=1, loc='upper center', bbox_to_anchor=(0.5, 1.3),
+                          ncol=1, fancybox=True, shadow=True)
 
         # Diplay is nicely in subplots.
         plt.setp([a.get_xticklabels() for a in f.axes[:-1]], visible=False)
@@ -229,9 +220,10 @@ class VisualizeDataset:
                 # Now we come to the assumption that there are three data_cols specified:
                 if not len(data_cols) == 3:
                     return
-                plot_color = self.colors[color_index%len(self.colors)]
-                plot_marker = point_displays[marker_index%len(point_displays)]
-                pt = ax.scatter(rows[data_cols[0]], rows[data_cols[1]], rows[data_cols[2]], c=plot_color, marker=plot_marker)
+                plot_color = self.colors[color_index % len(self.colors)]
+                plot_marker = point_displays[marker_index % len(point_displays)]
+                pt = ax.scatter(rows[data_cols[0]], rows[data_cols[1]], rows[data_cols[2]], c=plot_color,
+                                marker=plot_marker)
                 if color_index == 0:
                     handles.append(pt)
                 ax.set_xlabel(data_cols[0])
@@ -249,13 +241,13 @@ class VisualizeDataset:
     # For this, a column expressing the silhouette for each datapoint is assumed.
     def plot_silhouette(self, data_table, cluster_col, silhouette_col):
         # Taken from the examples of scikit learn
-        #(http://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_silhouette_analysis.html)
+        # (http://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_silhouette_analysis.html)
 
         clusters = data_table[cluster_col].unique()
 
         fig, ax1 = plt.subplots(1, 1)
         ax1.set_xlim([-0.1, 1])
-        #ax1.set_ylim([0, len(data_table.index) + (len(clusters) + 1) * 10])
+        # ax1.set_ylim([0, len(data_table.index) + (len(clusters) + 1) * 10])
         y_lower = 10
         for i in range(0, len(clusters)):
             # Aggregate the silhouette scores for samples belonging to
@@ -269,8 +261,8 @@ class VisualizeDataset:
 
             color = plt.get_cmap('Spectral')(float(i) / len(clusters))
             ax1.fill_betweenx(np.arange(y_lower, y_upper),
-                          0, ith_cluster_silhouette_values,
-                          facecolor=color, edgecolor=color, alpha=0.7)
+                              0, ith_cluster_silhouette_values,
+                              facecolor=color, edgecolor=color, alpha=0.7)
 
             # Label the silhouette plots with their cluster numbers at the middle
             ax1.text(-0.05, y_lower + 0.5 * size_cluster_i, str(i))
@@ -298,8 +290,9 @@ class VisualizeDataset:
         plt.xlabel('time points')
         plt.ylabel('distance')
         times = dataset.index.strftime('%H:%M:%S')
-        #dendrogram(linkage,truncate_mode='lastp',p=10, show_leaf_counts=True, leaf_rotation=90.,leaf_font_size=12.,show_contracted=True, labels=times)
-        dendrogram(linkage,truncate_mode='lastp',p=16, show_leaf_counts=True, leaf_rotation=45.,leaf_font_size=8.,show_contracted=True, labels=times)
+        # dendrogram(linkage,truncate_mode='lastp',p=10, show_leaf_counts=True, leaf_rotation=90.,leaf_font_size=12.,show_contracted=True, labels=times)
+        dendrogram(linkage, truncate_mode='lastp', p=16, show_leaf_counts=True, leaf_rotation=45., leaf_font_size=8.,
+                   show_contracted=True, labels=times)
         self.save(plt)
         plt.show()
 
@@ -309,7 +302,7 @@ class VisualizeDataset:
         # Taken from http://scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html
 
         # Select the colormap.
-        cmap=plt.cm.Blues
+        cmap = plt.cm.Blues
         plt.imshow(cm, interpolation='nearest', cmap=cmap)
         plt.title('confusion matrix')
         plt.colorbar()
@@ -333,7 +326,8 @@ class VisualizeDataset:
     # This function plots the predictions or an algorithms (both for the training and test set) versus the real values for
     # a regression problem. It assumes only a single value to be predicted over a number of cases. The variables identified
     # with reg_ are the predictions.
-    def plot_numerical_prediction_versus_real(self, train_time, train_y, regr_train_y, test_time, test_y, regr_test_y, label):
+    def plot_numerical_prediction_versus_real(self, train_time, train_y, regr_train_y, test_time, test_y, regr_test_y,
+                                              label):
         self.legends = {}
 
         # Plot the values, training set cases in blue, test set in red.
@@ -348,23 +342,29 @@ class VisualizeDataset:
         plt.plot(test_time, test_y, '-', linewidth=0.5)
         plt.plot(test_time, regr_test_y, '--', linewidth=0.5)
 
-        plt.legend(['real values training', 'predicted values training', 'real values test', 'predicted values test'], loc=4)
-
+        plt.legend(['real values training', 'predicted values training', 'real values test', 'predicted values test'],
+                   loc=4)
 
         # And create some fancy stuff in the figure to label the training and test set a bit clearer.
-        max_y_value = max(max(train_y.tolist()), max(regr_train_y.tolist()), max(test_y.tolist()), max(regr_test_y.tolist()))
-        min_y_value = min(min(train_y.tolist()), min(regr_train_y.tolist()), min(test_y.tolist()), min(regr_test_y.tolist()))
+        max_y_value = max(max(train_y.tolist()), max(regr_train_y.tolist()), max(test_y.tolist()),
+                          max(regr_test_y.tolist()))
+        min_y_value = min(min(train_y.tolist()), min(regr_train_y.tolist()), min(test_y.tolist()),
+                          min(regr_test_y.tolist()))
         range = max_y_value - min_y_value
-        y_coord_labels = max(max(train_y.tolist()), max(regr_train_y.tolist()), max(test_y.tolist()), max(regr_test_y.tolist()))+(0.01*range)
-
+        y_coord_labels = max(max(train_y.tolist()), max(regr_train_y.tolist()), max(test_y.tolist()),
+                             max(regr_test_y.tolist())) + (0.01 * range)
 
         plt.title('Performance of model for ' + str(label))
         plt.ylabel(label)
         plt.xlabel('time')
-        plt.annotate('', xy=(train_time[0],y_coord_labels), xycoords='data', xytext=(train_time[-1], y_coord_labels), textcoords='data', arrowprops={'arrowstyle': '<->'})
-        plt.annotate('training set', xy=(train_time[int(float(len(train_time))/2)], y_coord_labels*1.02), color='blue', xycoords='data', ha='center')
-        plt.annotate('', xy=(test_time[0], y_coord_labels), xycoords='data', xytext=(test_time[-1], y_coord_labels), textcoords='data', arrowprops={'arrowstyle': '<->'})
-        plt.annotate('test set', xy=(test_time[int(float(len(test_time))/2)], y_coord_labels*1.02), color='red', xycoords='data', ha='center')
+        plt.annotate('', xy=(train_time[0], y_coord_labels), xycoords='data', xytext=(train_time[-1], y_coord_labels),
+                     textcoords='data', arrowprops={'arrowstyle': '<->'})
+        plt.annotate('training set', xy=(train_time[int(float(len(train_time)) / 2)], y_coord_labels * 1.02),
+                     color='blue', xycoords='data', ha='center')
+        plt.annotate('', xy=(test_time[0], y_coord_labels), xycoords='data', xytext=(test_time[-1], y_coord_labels),
+                     textcoords='data', arrowprops={'arrowstyle': '<->'})
+        plt.annotate('test set', xy=(test_time[int(float(len(test_time)) / 2)], y_coord_labels * 1.02), color='red',
+                     xycoords='data', ha='center')
         self.save(plt)
         plt.show()
 
@@ -383,24 +383,26 @@ class VisualizeDataset:
         plt.scatter(fit_1_train, fit_2_train, color='r')
         plt.xlabel('mse on ' + str(dynsys_output[0][0].columns[0]))
         plt.ylabel('mse on ' + str(dynsys_output[0][0].columns[1]))
-        #plt.savefig('{0} Example ({1}).pdf'.format(ea.__class__.__name__, problem.__class__.__name__), format='pdf')
+        # plt.savefig('{0} Example ({1}).pdf'.format(ea.__class__.__name__, problem.__class__.__name__), format='pdf')
         self.save(plt)
         plt.show()
 
     # Plot a prediction for a regression model in case it concerns a multi-objective dynamical systems model. Here, we plot
     # the individual specified. Again, the complete output of the MO approach is used as argument.
-    def plot_numerical_prediction_versus_real_dynsys_mo(self, train_time, train_y, test_time, test_y, dynsys_output, individual, label):
+    def plot_numerical_prediction_versus_real_dynsys_mo(self, train_time, train_y, test_time, test_y, dynsys_output,
+                                                        individual, label):
         regr_train_y = dynsys_output[individual][0][label]
         regr_test_y = dynsys_output[individual][2][label]
         train_y = train_y[label]
         test_y = test_y[label]
-        self.plot_numerical_prediction_versus_real(train_time, train_y, regr_train_y, test_time, test_y, regr_test_y, label)
+        self.plot_numerical_prediction_versus_real(train_time, train_y, regr_train_y, test_time, test_y, regr_test_y,
+                                                   label)
 
     # Visualizes the performance of different algorithms over different feature sets. Assumes the scores to contain
     # a score on the training set followed by an sd, and the same for the test set.
     def plot_performances(self, algs, feature_subset_names, scores_over_all_algs, ylim, std_mult, y_name):
 
-        width = float(1)/(len(feature_subset_names)+1)
+        width = float(1) / (len(feature_subset_names) + 1)
         ind = np.arange(len(algs))
         for i in range(0, len(feature_subset_names)):
             means = []
@@ -408,9 +410,9 @@ class VisualizeDataset:
             for j in range(0, len(algs)):
                 means.append(scores_over_all_algs[i][j][2])
                 std.append(std_mult * scores_over_all_algs[i][j][3])
-            plt.errorbar(ind + i * width, means, yerr=std, fmt=self.colors[i%len(self.colors)] + 'o', markersize='3')
+            plt.errorbar(ind + i * width, means, yerr=std, fmt=self.colors[i % len(self.colors)] + 'o', markersize='3')
         plt.ylabel(y_name)
-        plt.xticks(ind+(float(len(feature_subset_names))/2)*width, algs)
+        plt.xticks(ind + (float(len(feature_subset_names)) / 2) * width, algs)
         plt.legend(feature_subset_names, loc=4, numpoints=1)
         if not ylim is None:
             plt.ylim(ylim)

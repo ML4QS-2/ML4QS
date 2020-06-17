@@ -25,7 +25,7 @@ col_rename = {
     'Magnetometer': ['Time (s)', 'X', 'Y', 'Z', 'Time'],
     'Accelerometer': ['Time (s)', 'X', 'Y', 'Z', 'Time'],
     'Gyroscope': ['Time (s)', 'X', 'Y', 'Z', 'Time'],
-    'Labels': ['Time (s)', 'label', 'Step', 'Duration', 'Step', 'label_start', 'label_end']
+    'Labels': ['Time (s)', 'label', 'Step', 'Duration', 'StepDuration', 'label_start', 'label_end']
 }
 
 for file_name in file_names:
@@ -34,7 +34,7 @@ for file_name in file_names:
     df['new_timestamp'] = df.apply(lambda row: calc_min_sec_etc(row['Time (s)']), axis=1)
 
     if file_name == 'Labels':
-        df['label_end'] = pd.to_datetime(df['new_timestamp']) + pd.to_timedelta(df['Duration'], 's')
+        df['label_end'] = pd.to_datetime(df['new_timestamp']) + pd.to_timedelta(1, 's')
         df['label_end'] = df['label_end'].astype('int64')
 
     df.columns = col_rename[file_name]

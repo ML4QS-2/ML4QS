@@ -82,6 +82,8 @@ periodic_measurements = ['acc_phone_X', 'acc_phone_Y', 'acc_phone_Z', 'gyr_phone
 
 for col in periodic_measurements:
     dataset = LowPass.low_pass_filter(dataset, col, fs, cutoff, order=10)
+    DataViz.plot_dataset(dataset.iloc[int(0.5 * len(new_dataset.index)):int(0.8 * len(new_dataset.index))],
+                         [col, col + '_lowpass'], ['exact', 'exact'], ['line', 'line'])
     dataset[col] = dataset[col + '_lowpass']
     del dataset[col + '_lowpass']
 

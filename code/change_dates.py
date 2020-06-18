@@ -5,18 +5,9 @@ import pandas as pd
 
 
 def calc_min_sec_etc(second):
-    s = float(second)
-    sec = math.floor(s)
-
-    m_sec = str(s - int(s))[2:5]
-
-    hr_min_sec = str(datetime.timedelta(seconds=max(sec, 0)))
-    h = int(float(hr_min_sec.split(':')[0]))
-    m = int(float(hr_min_sec.split(':')[1]))
-    s = int(float(hr_min_sec.split(':')[2]))
-
-    # 19 = 17 hours --> GMT?
-    now = int(round(datetime.datetime(2020, 6, 16, 19 + h, m, s, int(float(m_sec))).timestamp() * 1000000000))
+    hr_min_sec = datetime.timedelta(seconds=max(second, 0))
+    now = datetime.datetime(2020, 6, 16, 17, 0, 0, 0) + hr_min_sec
+    now = pd.Timestamp(now).value
     return now
 
 

@@ -74,12 +74,22 @@ def main():
         try:
             dataset = OutlierDist.local_outlier_factor(dataset, [col], 'euclidean', 5)
             DataViz.plot_dataset(dataset, [col, 'lof'], ['exact', 'exact'], ['line', 'points'])
+            DataViz.plot_dataset_boxplot(dataset, ['lof'])
+            # print(col, dataset['lof'].describe())
+            qtls = list(dataset['lof'].quantile([0.01, 0.25, 0.5, 0.75, 0.99]))
+            # print(col, qtls)
+            #print(col, qtls[4])
+            
+            dataset['lof_outliers'] = False
+            dataset.loc[(dataset['lof'] > qtls[4]), 'lof_outliers'] = True
+
+            DataViz.plot_binary_outliers(dataset, col, 'lof_outliers')
         except MemoryError as e:
             print('Not enough memory available for lof...')
             print('Skipping.')
 
         # Remove all the stuff from the dataset again.
-        cols_to_remove = [col + '_outlier', col + '_mixture', 'simple_dist_outlier', 'lof']
+        cols_to_remove = [col + '_outlier', col + '_mixture', 'simple_dist_outlier', 'lof', 'lof_outliers']
         for to_remove in cols_to_remove:
             if to_remove in dataset:
                 del dataset[to_remove]

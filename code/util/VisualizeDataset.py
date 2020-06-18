@@ -24,7 +24,8 @@ class VisualizeDataset:
     def save(self, plot_obj, formats=('png',)):  # 'svg'
 
         fig_name = f'figure_{self.plot_number}'
-
+        plt.tight_layout()
+        
         for format in formats:
             save_path = self.figures_dir / f'{fig_name}.{format}'
             plot_obj.savefig(save_path, dpi=300)

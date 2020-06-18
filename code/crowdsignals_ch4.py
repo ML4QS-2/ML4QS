@@ -13,7 +13,6 @@ from pathlib import Path
 
 import pandas as pd
 from Chapter4.FrequencyAbstraction import FourierTransformation
-from Chapter4.TemporalAbstraction import CategoricalAbstraction
 from Chapter4.TemporalAbstraction import NumericalAbstraction
 from util.VisualizeDataset import VisualizeDataset
 
@@ -42,59 +41,61 @@ milliseconds_per_instance = (dataset.index[1] - dataset.index[0]).microseconds /
 
 # OLD: Set the window sizes to the number of instances representing 5 seconds, 30 seconds and 5 minutes
 # NEW: Set the window sizes to the number of instances representing 1 second, 8 seconds, 16 seconds  and 24 seconds
-window_sizes = [int(float(1000) / milliseconds_per_instance), int(float(8000) / milliseconds_per_instance),
-                int(float(16000) / milliseconds_per_instance), int(float(24000) / milliseconds_per_instance)]
+window_sizes = [int(float(1000) / milliseconds_per_instance), int(float(4000) / milliseconds_per_instance),
+                int(float(8000) / milliseconds_per_instance)]
 
 NumAbs = NumericalAbstraction()
 dataset_copy = copy.deepcopy(dataset)
-for ws in window_sizes:
-    dataset_copy = NumAbs.abstract_numerical(dataset_copy, ['acc_phone_X'], ws, 'mean')
-    dataset_copy = NumAbs.abstract_numerical(dataset_copy, ['acc_phone_X'], ws, 'std')
+# for ws in window_sizes:
+#     dataset_copy = NumAbs.abstract_numerical(dataset_copy, ['acc_phone_X'], ws, 'mean')
+#     dataset_copy = NumAbs.abstract_numerical(dataset_copy, ['acc_phone_X'], ws, 'std')
+#
+# DataViz.plot_dataset(dataset_copy, ['acc_phone_X', 'acc_phone_X_temp_mean', 'acc_phone_X_temp_std', 'label'],
+#                      ['exact', 'like', 'like', 'like'], ['line', 'line', 'line', 'points'])
 
-DataViz.plot_dataset(dataset_copy, ['acc_phone_X', 'acc_phone_X_temp_mean', 'acc_phone_X_temp_std', 'label'],
-                     ['exact', 'like', 'like', 'like'], ['line', 'line', 'line', 'points'])
-
-# ws = int(float(0.5 * 60000) / milliseconds_per_instance) # TODO Check which suits the data best!
-ws = int(float(8000) / milliseconds_per_instance)
+# ws = int(float(0.5 * 60000) / milliseconds_per_instance) $ FIXME they only use one window size! We do multiple
+# ws = int(float(8000) / milliseconds_per_instance)
+ws = int(float(4000) / milliseconds_per_instance)
+# for ws in window_sizes: #FIXME uncomment for multiple ws's
 selected_predictor_cols = [c for c in dataset.columns if not 'label' in c]
 dataset = NumAbs.abstract_numerical(dataset, selected_predictor_cols, ws, 'mean')
 dataset = NumAbs.abstract_numerical(dataset, selected_predictor_cols, ws, 'std')
 
-# TODO check if PCA_1 works for us!
-DataViz.plot_dataset(dataset,
-                     ['acc_phone_X', 'gyr_phone_X', 'mag_phone_X', 'pca_1', 'label'],
-                     ['like', 'like', 'like', 'like', 'like'],
-                     ['line', 'line', 'line', 'line', 'points'])
-
-# TODO check what is best window size for label?
-CatAbs = CategoricalAbstraction()
-dataset = CatAbs.abstract_categorical(dataset, ['label'], ['like'], 0.03,
-                                      int(float(5 * 60000) / milliseconds_per_instance), 2)
-
+# DataViz.plot_dataset(dataset,
+#                      ['acc_phone_X', 'gyr_phone_X', 'mag_phone_X', 'pca_1', 'label'],
+#                      ['like', 'like', 'like', 'like', 'like'],
+#                      ['line', 'line', 'line', 'line', 'points'])
+#
+# # support for labels is useless in our case
+# CatAbs = CategoricalAbstraction()
+# dataset = CatAbs.abstract_categorical(dataset, ['label'], ['like'], 0.03,
+#                                       int(float(8000) / milliseconds_per_instance), 2)
+#
 # Now we move to the frequency domain, with the same window size.
 
 FreqAbs = FourierTransformation()
-fs = float(1000) / milliseconds_per_instance  # Todo change!
+fs = float(1000) / milliseconds_per_instance  # Todo change?
 
 periodic_predictor_cols = ['acc_phone_X', 'acc_phone_Y', 'acc_phone_Z',
                            'gyr_phone_X', 'gyr_phone_Y', 'gyr_phone_Z',
                            'mag_phone_X', 'mag_phone_Y', 'mag_phone_Z']
-# TODO check window size? And other things than acc_phone_X
-data_table = FreqAbs.abstract_frequency(copy.deepcopy(dataset), ['acc_phone_X'],
-                                        int(float(10000) / milliseconds_per_instance), fs)
+#
+# data_table = FreqAbs.abstract_frequency(copy.deepcopy(dataset), ['acc_phone_Y'],
+#                                         int(float(4000) / milliseconds_per_instance), fs)
 
 # Spectral analysis.
 
-DataViz.plot_dataset(data_table, ['acc_phone_X_max_freq', 'acc_phone_X_freq_weighted', 'acc_phone_X_pse', 'label'],
-                     ['like', 'like', 'like', 'like'], ['line', 'line', 'line', 'points'])
-# TODO change?
-dataset = FreqAbs.abstract_frequency(dataset, periodic_predictor_cols, int(float(10000) / milliseconds_per_instance),
-                                     fs)
+# DataViz.plot_dataset(data_table, ['acc_phone_Y_max_freq', 'acc_phone_Y_freq_weighted', 'acc_phone_Y_pse', 'label'],
+#                      ['like', 'like', 'like', 'like'], ['line', 'line', 'line', 'points'])
+# we use 4s
+ws_freq = int(float(4000) / milliseconds_per_instance)
+dataset = FreqAbs.abstract_frequency(dataset, periodic_predictor_cols, ws_freq, fs)
 
 # Now we only take a certain percentage of overlap in the windows, otherwise our training examples will be too much alike.
 
+ws = int(float(4000) / milliseconds_per_instance)  # we remove 10% of the data for every second.
 # The percentage of overlap we allow
-window_overlap = 0.9  # TODO change?
+window_overlap = 0.9
 skip_points = int((1 - window_overlap) * ws)
 dataset = dataset.iloc[::skip_points, :]
 

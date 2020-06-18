@@ -95,11 +95,15 @@ def main():
                 del dataset[to_remove]
 
     # We take Chauvenet's criterion and apply it to all but the label data...
-
     for col in [c for c in dataset.columns if not 'label' in c]:
         print(f'Measurement is now: {col}')
-        dataset = OutlierDistr.chauvenet(dataset, col)
+        if col.startswith('mag'):
+            dataset = OutlierDist.simple_distance_based(dataset, [col], 'euclidean', 0.10, 0.99).rename(columns={'simple_dist_outlier': f'{col}_outlier'})
+        else:
+            dataset = OutlierDistr.chauvenet(dataset, col)
+
         dataset.loc[dataset[f'{col}_outlier'] == True, col] = np.nan
+        DataViz.plot_binary_outliers(dataset, col, f'{col}_outlier')
         del dataset[col + '_outlier']
 
     dataset.to_csv(DATA_PATH / RESULT_FNAME)

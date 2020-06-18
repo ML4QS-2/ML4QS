@@ -69,7 +69,7 @@ LowPass = LowPassFilter()
 # Determine the sampling frequency.
 print("milliseconds_per_instance ", milliseconds_per_instance)
 fs = float(4000) / milliseconds_per_instance  # old value 1000
-cutoff = 2  # 1.5 hz?
+cutoff = 4  # 1.5 hz?
 
 # Let us study acc_phone_X:
 new_dataset = LowPass.low_pass_filter(copy.deepcopy(dataset), 'acc_phone_X', fs, cutoff, order=10)

@@ -15,7 +15,6 @@ import pandas as pd
 from Chapter3.DataTransformation import LowPassFilter
 from Chapter3.DataTransformation import PrincipalComponentAnalysis
 from Chapter3.ImputationMissingValues import ImputationMissingValues
-from Chapter3.KalmanFilters import KalmanFilters
 from util.VisualizeDataset import VisualizeDataset
 
 # Set up the file names and locations.
@@ -55,24 +54,26 @@ for col in [c for c in dataset.columns if not 'label' in c]:
 
 original_dataset = pd.read_csv(DATA_PATH / ORIG_DATASET_FNAME, index_col=0)
 original_dataset.index = pd.to_datetime(original_dataset.index)
-KalFilter = KalmanFilters()
-kalman_dataset = KalFilter.apply_kalman_filter(original_dataset, 'acc_phone_X')
-DataViz.plot_imputed_values(kalman_dataset, ['original', 'kalman'], 'acc_phone_X', kalman_dataset['acc_phone_X_kalman'])
-DataViz.plot_dataset(kalman_dataset, ['acc_phone_X', 'acc_phone_X_kalman'], ['exact', 'exact'], ['line', 'line'])
+# We don't use this but we can leave it in?
+# KalFilter = KalmanFilters()
+# kalman_dataset = KalFilter.apply_kalman_filter(original_dataset, 'acc_phone_X')
+# DataViz.plot_imputed_values(kalman_dataset, ['original', 'kalman'], 'acc_phone_X', kalman_dataset['acc_phone_X_kalman'])
+# DataViz.plot_dataset(kalman_dataset, ['acc_phone_X', 'acc_phone_X_kalman'], ['exact', 'exact'], ['line', 'line'])
 
 # We ignore the Kalman filter output for now...
 
-# Let us apply a lowpass filter and reduce the importance of the data above 1.5 Hz
+# Let us apply a lowpass filter and reduce the importance of the data above 1.5 Hz --> 2Hz
 
 LowPass = LowPassFilter()
 
 # Determine the sampling frequency.
-fs = float(1000) / milliseconds_per_instance
-cutoff = 1.5  # 1.5 hz?
+print("milliseconds_per_instance ", milliseconds_per_instance)
+fs = float(4000) / milliseconds_per_instance  # old value 1000
+cutoff = 2  # 1.5 hz?
 
 # Let us study acc_phone_X:
 new_dataset = LowPass.low_pass_filter(copy.deepcopy(dataset), 'acc_phone_X', fs, cutoff, order=10)
-DataViz.plot_dataset(new_dataset.iloc[int(0.4 * len(new_dataset.index)):int(0.43 * len(new_dataset.index)), :],
+DataViz.plot_dataset(new_dataset.iloc[int(0 * len(new_dataset.index)):int(0.8 * len(new_dataset.index)), :],
                      ['acc_phone_X', 'acc_phone_X_lowpass'], ['exact', 'exact'], ['line', 'line'])
 
 # And not let us include all measurements that have a form of periodicity (and filter them):
@@ -98,7 +99,7 @@ DataViz.plot_xy(x=[range(1, len(selected_predictor_cols) + 1)], y=[pc_values],
 
 # We select 7 as the best number of PC's as this explains most of the variance
 
-n_pcs = 7
+n_pcs = 3
 
 dataset = PCA.apply_pca(copy.deepcopy(dataset), selected_predictor_cols, n_pcs)
 

@@ -47,7 +47,14 @@ def print_table_cell(value1, value2):
 def print_latex_table_statistics_two_datasets(dataset1, dataset2):
     print('attribute, fraction missing values, mean, standard deviation, min, max')
     dataset1_length = len(dataset1.index)
+    print('dataset 1 length: {}'.format(dataset1_length ))
+    for col in dataset1.columns:
+        print('dataset 1 column {} length: {}'.format(col, dataset1[col].count()))
     dataset2_length = len(dataset2.index)
+    print('dataset 2 length: {}'.format(dataset2_length ))
+    for col in dataset2.columns:
+        print('dataset 2 column {} length: {}'.format(col, dataset2[col].count()))
+    
     for col in dataset1.columns:
         print(col, '& ', end='')
         print_table_cell((float((dataset1_length - dataset1[col].count()))/dataset1_length)*100, (float((dataset2_length - dataset2[col].count()))/dataset2_length)*100)

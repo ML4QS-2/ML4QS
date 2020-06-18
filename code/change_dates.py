@@ -8,7 +8,7 @@ def calc_min_sec_etc(second):
     s = float(second)
     sec = math.floor(s)
 
-    m_sec = str(s - int(s))[2:5]
+    m_sec = str(s - int(s))[2:8]
 
     hr_min_sec = str(datetime.timedelta(seconds=max(sec, 0)))
     h = int(float(hr_min_sec.split(':')[0]))

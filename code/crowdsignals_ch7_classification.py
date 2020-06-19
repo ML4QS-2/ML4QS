@@ -11,7 +11,6 @@ from pathlib import Path
 
 import pandas as pd
 from Chapter7.Evaluation import ClassificationEvaluation
-from Chapter7.FeatureSelection import FeatureSelectionClassification
 from Chapter7.LearningAlgorithms import ClassificationAlgorithms
 from Chapter7.PrepareDatasetForLearning import PrepareDatasetForLearning
 from util import util
@@ -53,47 +52,49 @@ print('Test set length is: ', len(test_X.index))
 
 # Select subsets of the features that we will consider:
 # TODO change all the features!
-basic_features = ['acc_phone_x', 'acc_phone_y', 'acc_phone_z', 'acc_watch_x', 'acc_watch_y', 'acc_watch_z',
-                  'gyr_phone_x', 'gyr_phone_y', 'gyr_phone_z', 'gyr_watch_x', 'gyr_watch_y', 'gyr_watch_z',
-                  'hr_watch_rate', 'light_phone_lux', 'mag_phone_x', 'mag_phone_y', 'mag_phone_z', 'mag_watch_x',
-                  'mag_watch_y', 'mag_watch_z', 'press_phone_pressure']
-pca_features = ['pca_1', 'pca_2', 'pca_3', 'pca_4', 'pca_5', 'pca_6', 'pca_7']
+basic_features = ['acc_phone_X', 'acc_phone_Y', 'acc_phone_Z',
+                  'gyr_phone_X', 'gyr_phone_Y', 'gyr_phone_Z',
+                  'mag_phone_X', 'mag_phone_Y', 'mag_phone_Z']
+pca_features = ['pca_1', 'pca_2', 'pca_3']
 time_features = [name for name in dataset.columns if '_temp_' in name]
 freq_features = [name for name in dataset.columns if (('_freq' in name) or ('_pse' in name))]
 print('#basic features: ', len(basic_features))
 print('#PCA features: ', len(pca_features))
 print('#time features: ', len(time_features))
 print('#frequency features: ', len(freq_features))
-cluster_features = ['cluster']
-print('#cluster features: ', len(cluster_features))
+# cluster_features = ['cluster'] # We didn't include clusters
+# print('#cluster features: ', len(cluster_features))
 features_after_chapter_3 = list(set().union(basic_features, pca_features))
 features_after_chapter_4 = list(set().union(basic_features, pca_features, time_features, freq_features))
-features_after_chapter_5 = list(
-    set().union(basic_features, pca_features, time_features, freq_features, cluster_features))
+# features_after_chapter_5 = list(
+#     set().union(basic_features, pca_features, time_features, freq_features)) # We didn't add any..
 
 # First, let us consider the performance over a selection of features:
 
-fs = FeatureSelectionClassification()
-
-features, ordered_features, ordered_scores = fs.forward_selection(N_FORWARD_SELECTION,
-                                                                  train_X[features_after_chapter_5], train_y)
-print(ordered_scores)
-print(ordered_features)
-
-DataViz.plot_xy(x=[range(1, N_FORWARD_SELECTION + 1)], y=[ordered_scores],
-                xlabel='number of features', ylabel='accuracy')
+# fs = FeatureSelectionClassification()
+#
+# features, ordered_features, ordered_scores = fs.forward_selection(N_FORWARD_SELECTION,
+#                                                                   train_X[features_after_chapter_5], train_y)
+# print(ordered_scores)
+# print(ordered_features)
+#
+# DataViz.plot_xy(x=[range(1, N_FORWARD_SELECTION + 1)], y=[ordered_scores],
+#                 xlabel='number of features', ylabel='accuracy')
 
 # Based on the plot we select the top 10 features (note: slightly different compared to Python 2, we use
 # those feartures here).
-
-selected_features = ['acc_phone_y_freq_0.0_Hz_ws_40', 'press_phone_pressure_temp_mean_ws_120',
-                     'gyr_phone_x_temp_std_ws_120',
-                     'mag_watch_y_pse', 'mag_phone_z_max_freq', 'gyr_watch_y_freq_weighted',
-                     'gyr_phone_y_freq_1.0_Hz_ws_40',
-                     'acc_phone_x_freq_1.9_Hz_ws_40', 'mag_watch_z_freq_0.9_Hz_ws_40', 'acc_watch_y_freq_0.5_Hz_ws_40']
-
-# Let us first study the impact of regularization and model complexity: does regularization prevent overfitting?
-
+selected_features = ['gyr_phone_Z_freq_2.0_Hz_ws_16', 'gyr_phone_X_freq_1.0_Hz_ws_16', 'mag_phone_Z_freq_0.75_Hz_ws_16',
+                     'mag_phone_Y_freq_0.75_Hz_ws_16', 'pca_1_temp_std_ws_16', 'acc_phone_Z_temp_mean_ws_16',
+                     'acc_phone_X_freq_0.0_Hz_ws_16', 'pca_3_temp_std_ws_16', 'mag_phone_X_freq_1.25_Hz_ws_16',
+                     'mag_phone_Z_freq_0.25_Hz_ws_16']
+# selected_features = ['acc_phone_y_freq_0.0_Hz_ws_40', 'press_phone_pressure_temp_mean_ws_120',
+#                      'gyr_phone_x_temp_std_ws_120',
+#                      'mag_watch_y_pse', 'mag_phone_z_max_freq', 'gyr_watch_y_freq_weighted',
+#                      'gyr_phone_y_freq_1.0_Hz_ws_40',
+#                      'acc_phone_x_freq_1.9_Hz_ws_40', 'mag_watch_z_freq_0.9_Hz_ws_40', 'acc_watch_y_freq_0.5_Hz_ws_40']
+#
+# # Let us first study the impact of regularization and model complexity: does regularization prevent overfitting?
+#
 learner = ClassificationAlgorithms()
 eval = ClassificationEvaluation()
 
@@ -145,9 +146,9 @@ DataViz.plot_xy(x=[leaf_settings, leaf_settings], y=[performance_training, perfo
 # So yes, it is important :) Therefore we perform grid searches over the most important parameters, and do so by means
 # of cross validation upon the training set.
 
-possible_feature_sets = [basic_features, features_after_chapter_3, features_after_chapter_4, features_after_chapter_5,
-                         selected_features]
-feature_names = ['initial set', 'Chapter 3', 'Chapter 4', 'Chapter 5', 'Selected features']
+possible_feature_sets = [basic_features, features_after_chapter_3, features_after_chapter_4, selected_features]
+feature_names = ['initial set', 'Chapter 3', 'Chapter 4', 'Selected features']
+
 N_KCV_REPEATS = 5
 
 scores_over_all_algs = []
@@ -226,17 +227,18 @@ DataViz.plot_performances_classification(['NN', 'RF', 'SVM', 'KNN', 'DT', 'NB'],
 # And we study two promising ones in more detail. First, let us consider the decision tree, which works best with the
 # selected features.
 
-class_train_y, class_test_y, class_train_prob_y, class_test_prob_y = learner.decision_tree(train_X[selected_features],
-                                                                                           train_y,
-                                                                                           test_X[selected_features],
-                                                                                           gridsearch=True,
-                                                                                           print_model_details=True,
-                                                                                           export_tree_path=EXPORT_TREE_PATH)
-
-class_train_y, class_test_y, class_train_prob_y, class_test_prob_y = learner.random_forest(
-    train_X[selected_features], train_y, test_X[selected_features],
-    gridsearch=True, print_model_details=True)
-
-test_cm = eval.confusion_matrix(test_y, class_test_y, class_train_prob_y.columns)
-
-DataViz.plot_confusion_matrix(test_cm, class_train_prob_y.columns, normalize=False)
+# class_train_y, class_test_y, class_train_prob_y, class_test_prob_y = learner.decision_tree(
+#     train_X[features_after_chapter_4],
+#     train_y,
+#     test_X[features_after_chapter_4],
+#     gridsearch=True,
+#     print_model_details=True,
+#     export_tree_path=EXPORT_TREE_PATH)
+#
+# class_train_y, class_test_y, class_train_prob_y, class_test_prob_y = learner.random_forest(
+#     train_X[features_after_chapter_4], train_y, test_X[features_after_chapter_4],
+#     gridsearch=True, print_model_details=True)
+#
+# test_cm = eval.confusion_matrix(test_y, class_test_y, class_train_prob_y.columns)
+#
+# DataViz.plot_confusion_matrix(test_cm, class_train_prob_y.columns, normalize=False)

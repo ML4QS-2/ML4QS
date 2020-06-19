@@ -26,20 +26,62 @@ import pandas as pd
 import numpy as np
 import os
 
+
+import matplotlib.pyplot as plt
+    
+def plotcv(gridsearch):
+
+    print(gridsearch.cv_results_)
+    best_params = gridsearch.best_params_
+    param_grid = gridsearch.param_grid
+    cv_results = gridsearch.cv_results_
+    means_test = gridsearch.cv_results_['mean_test_score']
+    stds_test = gridsearch.cv_results_['std_test_score']
+    
+    ## Getting indexes of values per hyper-parameter
+    masks=[]
+    masks_names= list(best_params.keys())
+    for p_k, p_v in best_params.items():
+        masks.append(list(cv_results['param_'+p_k].data==p_v))
+    
+    params=param_grid[0]
+    
+    ## Ploting results
+    fig, ax = plt.subplots(1,len(params),sharex=False, sharey=True,figsize=(6,5))
+    #fig.text(0.04, 0.5, 'Accuracy', va='center', rotation='vertical')
+    pram_preformace_in_best = {}
+    for i, p in enumerate(masks_names):
+        m = np.stack(masks[:i] + masks[i+1:])
+        pram_preformace_in_best
+        best_parms_mask = m.all(axis=0)
+        best_index = np.where(best_parms_mask)[0]
+        print(params)
+        print(p)
+        x = np.array(list(map(str, params[p])))
+        y_1 = np.array(means_test[best_index])
+        e_1 = np.array(stds_test[best_index])
+        ax[i].bar(x, y_1, label='test')
+        ax[i].errorbar(x, y_1, e_1, marker='o', label='test', fmt='none', c='r')
+        ax[i].set_xlabel(p)
+    ax[0].set_ylabel("Accuracy")
+    plt.tight_layout()
+    plt.savefig('figures/grid-search.png', dpi=300)
+    plt.show()
+
 class ClassificationAlgorithms:
 
     # Apply a neural network for classification upon the training data (with the specified composition of
     # hidden layers and number of iterations), and use the created network to predict the outcome for both the
     # test and training set. It returns the categorical predictions for the training and test set as well as the
     # probabilities associated with each class, each class being represented as a column in the data frame.
-    def feedforward_neural_network(self, train_X, train_y, test_X, hidden_layer_sizes=(100,), max_iter=500, activation='logistic', alpha=0.0001, learning_rate='adaptive', gridsearch=True, print_model_details=False):
+    def feedforward_neural_network(self, train_X, train_y, test_X, hidden_layer_sizes=(100,), max_iter=500, activation='logistic', alpha=0.0001, learning_rate='adaptive', gridsearch=True, print_model_details=True):
 
 
         if gridsearch:
             # With the current parameters for max_iter and Python 3 packages convergence is not always reached, therefore increased +1000.
             tuned_parameters = [{'hidden_layer_sizes': [(5,), (10,), (25,), (100,), (100,5,), (100,10,),], 'activation': [activation],
                                  'learning_rate': [learning_rate], 'max_iter': [2000, 3000], 'alpha': [alpha]}]
-            nn = GridSearchCV(MLPClassifier(), tuned_parameters, cv=5, scoring='accuracy')
+            nn = GridSearchCV(MLPClassifier(), tuned_parameters, cv=5, scoring='accuracy', n_jobs=-1)
         else:
             # Create the model
             nn = MLPClassifier(hidden_layer_sizes=hidden_layer_sizes, activation=activation, max_iter=max_iter, learning_rate=learning_rate, alpha=alpha)
@@ -48,7 +90,7 @@ class ClassificationAlgorithms:
         nn.fit(train_X, train_y.values.ravel())
 
         if gridsearch and print_model_details:
-            print(nn.best_params_)
+            print('feedforward_neural_network', nn.best_params_)
 
         if gridsearch:
             nn = nn.best_estimator_
@@ -67,12 +109,12 @@ class ClassificationAlgorithms:
     # C, epsilon and the kernel function), and use the created model to predict the outcome for both the
     # test and training set. It returns the categorical predictions for the training and test set as well as the
     # probabilities associated with each class, each class being represented as a column in the data frame.
-    def support_vector_machine_with_kernel(self, train_X, train_y, test_X, kernel='rbf', C=1, gamma=1e-3, gridsearch=True, print_model_details=False):
+    def support_vector_machine_with_kernel(self, train_X, train_y, test_X, kernel='rbf', C=1, gamma=1e-3, gridsearch=True, print_model_details=True):
         # Create the model
         if gridsearch:
             tuned_parameters = [{'kernel': ['rbf', 'poly'], 'gamma': [1e-3, 1e-4],
                          'C': [1, 10, 100]}]
-            svm = GridSearchCV(SVC(probability=True), tuned_parameters, cv=5, scoring='accuracy')
+            svm = GridSearchCV(SVC(probability=True), tuned_parameters, cv=5, scoring='accuracy', n_jobs=-1)
         else:
             svm = SVC(C=C, kernel=kernel, gamma=gamma, probability=True, cache_size=7000)
 
@@ -80,7 +122,7 @@ class ClassificationAlgorithms:
         svm.fit(train_X, train_y.values.ravel())
 
         if gridsearch and print_model_details:
-            print(svm.best_params_)
+            print('support_vector_machine_with_kernel', svm.best_params_)
 
         if gridsearch:
             svm = svm.best_estimator_
@@ -99,12 +141,12 @@ class ClassificationAlgorithms:
     # C, epsilon and the kernel function), and use the created model to predict the outcome for both the
     # test and training set. It returns the categorical predictions for the training and test set as well as the
     # probabilities associated with each class, each class being represented as a column in the data frame.
-    def support_vector_machine_without_kernel(self, train_X, train_y, test_X, C=1, tol=1e-3, max_iter=1000, gridsearch=True, print_model_details=False):
+    def support_vector_machine_without_kernel(self, train_X, train_y, test_X, C=1, tol=1e-3, max_iter=1000, gridsearch=True, print_model_details=True):
         # Create the model
         if gridsearch:
             tuned_parameters = [{'max_iter': [1000, 2000], 'tol': [1e-3, 1e-4],
                          'C': [1, 10, 100]}]
-            svm = GridSearchCV(LinearSVC(), tuned_parameters, cv=5, scoring='accuracy')
+            svm = GridSearchCV(LinearSVC(), tuned_parameters, cv=5, scoring='accuracy', n_jobs=-1)
         else:
             svm = LinearSVC(C=C, tol=tol, max_iter=max_iter)
 
@@ -112,7 +154,7 @@ class ClassificationAlgorithms:
         svm.fit(train_X, train_y.values.ravel())
 
         if gridsearch and print_model_details:
-            print(svm.best_params_)
+            print('support_vector_machine_without_kernel', svm.best_params_)
 
         if gridsearch:
             svm = svm.best_estimator_
@@ -135,11 +177,11 @@ class ClassificationAlgorithms:
     # k), and use the created model to predict the outcome for both the
     # test and training set. It returns the categorical predictions for the training and test set as well as the
     # probabilities associated with each class, each class being represented as a column in the data frame.
-    def k_nearest_neighbor(self, train_X, train_y, test_X, n_neighbors=5, gridsearch=True, print_model_details=False):
+    def k_nearest_neighbor(self, train_X, train_y, test_X, n_neighbors=5, gridsearch=True, print_model_details=True):
         # Create the model
         if gridsearch:
             tuned_parameters = [{'n_neighbors': [1, 2, 5, 10]}]
-            knn = GridSearchCV(KNeighborsClassifier(), tuned_parameters, cv=5, scoring='accuracy')
+            knn = GridSearchCV(KNeighborsClassifier(), tuned_parameters, cv=5, scoring='accuracy', n_jobs=-1)
         else:
             knn = KNeighborsClassifier(n_neighbors=n_neighbors)
 
@@ -147,7 +189,7 @@ class ClassificationAlgorithms:
         knn.fit(train_X, train_y.values.ravel())
 
         if gridsearch and print_model_details:
-            print(knn.best_params_)
+            print('k_nearest_neighbor', knn.best_params_)
 
         if gridsearch:
             knn = knn.best_estimator_
@@ -167,12 +209,12 @@ class ClassificationAlgorithms:
     # and use the created model to predict the outcome for both the
     # test and training set. It returns the categorical predictions for the training and test set as well as the
     # probabilities associated with each class, each class being represented as a column in the data frame.
-    def decision_tree(self, train_X, train_y, test_X, min_samples_leaf=50, criterion='gini', print_model_details=False, export_tree_path='./figures/crowdsignals_ch7_classification/', export_tree_name='tree.dot', gridsearch=True):
+    def decision_tree(self, train_X, train_y, test_X, min_samples_leaf=50, criterion='gini', print_model_details=True, export_tree_path='./figures/crowdsignals_ch7_classification/', export_tree_name='tree.dot', gridsearch=True):
         # Create the model
         if gridsearch:
             tuned_parameters = [{'min_samples_leaf': [2, 10, 50, 100, 200],
                                  'criterion':['gini', 'entropy']}]
-            dtree = GridSearchCV(DecisionTreeClassifier(), tuned_parameters, cv=5, scoring='accuracy')
+            dtree = GridSearchCV(DecisionTreeClassifier(), tuned_parameters, cv=5, scoring='accuracy', n_jobs=-1)
         else:
             dtree = DecisionTreeClassifier(min_samples_leaf=min_samples_leaf, criterion=criterion)
 
@@ -181,7 +223,7 @@ class ClassificationAlgorithms:
         dtree.fit(train_X, train_y.values.ravel())
 
         if gridsearch and print_model_details:
-            print(dtree.best_params_)
+            print('decision_tree', dtree.best_params_)
 
         if gridsearch:
             dtree = dtree.best_estimator_
@@ -233,13 +275,14 @@ class ClassificationAlgorithms:
     # model print_model_details=True) and use the created model to predict the outcome for both the
     # test and training set. It returns the categorical predictions for the training and test set as well as the
     # probabilities associated with each class, each class being represented as a column in the data frame.
-    def random_forest(self, train_X, train_y, test_X, n_estimators=10, min_samples_leaf=5, criterion='gini', print_model_details=False, gridsearch=True):
+    def random_forest(self, train_X, train_y, test_X, n_estimators=10, min_samples_leaf=5, criterion='gini', print_model_details=True, gridsearch=True):
 
         if gridsearch:
             tuned_parameters = [{'min_samples_leaf': [2, 10, 50, 100, 200],
                                  'n_estimators':[10, 50, 100],
                                  'criterion':['gini', 'entropy']}]
-            rf = GridSearchCV(RandomForestClassifier(), tuned_parameters, cv=5, scoring='accuracy')
+            rf = GridSearchCV(RandomForestClassifier(), tuned_parameters, cv=5, scoring='accuracy', n_jobs=-1)
+            gscv = rf
         else:
             rf = RandomForestClassifier(n_estimators=n_estimators, min_samples_leaf=min_samples_leaf, criterion=criterion)
 
@@ -248,7 +291,7 @@ class ClassificationAlgorithms:
         rf.fit(train_X, train_y.values.ravel())
 
         if gridsearch and print_model_details:
-            print(rf.best_params_)
+            print('random_forest', rf.best_params_)
 
         if gridsearch:
             rf = rf.best_estimator_
@@ -268,7 +311,7 @@ class ClassificationAlgorithms:
                 print(' & ', end='')
                 print(rf.feature_importances_[ordered_indices[i]])
 
-        return pred_training_y, pred_test_y, frame_prob_training_y, frame_prob_test_y
+        return pred_training_y, pred_test_y, frame_prob_training_y, frame_prob_test_y, gscv
 
 class RegressionAlgorithms:
 
